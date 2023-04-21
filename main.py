@@ -27,9 +27,9 @@ def reset_timer():
 def start_timer():
     global REPS
     REPS += 1
-    work_sec = WORK_MIN
-    short_break_sec = SHORT_BREAK_MIN
-    long_break_sec = LONG_BREAK_MIN
+    work_sec = WORK_MIN * 60
+    short_break_sec = SHORT_BREAK_MIN * 60
+    long_break_sec = LONG_BREAK_MIN * 60
     if REPS % 8 == 0:
         count_down(long_break_sec)
         timer_label.config(text="Break", fg=RED)
