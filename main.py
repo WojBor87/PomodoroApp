@@ -10,29 +10,36 @@ WORK_MIN = 20
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 25
 REPS = 0
+timer = None
 
 
 # ---------------------------- TIMER RESET ------------------------------- # 
+def reset_timer():
+    global REPS
+    window.after_cancel(timer)
+    timer_label.config(text="Timer")
+    canvas.itemconfig(timer_text, text="00:00")
+    check_label.config(text="")
+    REPS = 0
+
 
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 def start_timer():
     global REPS
-    REPS = REPS % 7
+    REPS += 1
     work_sec = WORK_MIN
     short_break_sec = SHORT_BREAK_MIN
     long_break_sec = LONG_BREAK_MIN
-    if REPS in [0, 2, 4, 6]:
-        count_down(work_sec)
-        timer_label.config(text="Work", fg=GREEN)
-        REPS += 1
-    elif REPS in [1, 3, 5]:
-        count_down(short_break_sec)
-        timer_label.config(text="Break", fg=PINK)
-        REPS += 1
-    elif REPS == 7:
+    if REPS % 8 == 0:
         count_down(long_break_sec)
         timer_label.config(text="Break", fg=RED)
-        REPS += 1
+        REPS = 0
+    elif REPS % 2 == 0:
+        count_down(short_break_sec)
+        timer_label.config(text="Break", fg=PINK)
+    else:
+        count_down(work_sec)
+        timer_label.config(text="Work", fg=GREEN)
 
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
@@ -41,13 +48,15 @@ def count_down(count):
     seconds = count % 60
     canvas.itemconfig(timer_text, text=f"{minutes:02}:{seconds:02}")
     if count >= 0:
-        window.after(1000, count_down, count - 1)
+        global timer
+        timer = window.after(1000, count_down, count - 1)
     else:
         start_timer()
-        if REPS % 2 == 0:
-            check = REPS / 2
-            text = "✓" * int(check)
-            check_label.config(text=f"{text}")
+        mark = ""
+        work_sessions = math.floor(REPS/2)
+        for _ in range (work_sessions):
+            mark += "✔"
+        check_label.config(text=mark)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -70,7 +79,7 @@ check_label.grid(column=2, row=4)
 start_button = Button(text="Start", bg=GREEN, highlightthickness=0, command=start_timer)
 start_button.grid(column=1, row=3)
 
-reset_button = Button(text="Reset", bg=GREEN, highlightthickness=0)
+reset_button = Button(text="Reset", bg=GREEN, highlightthickness=0, command=reset_timer)
 reset_button.grid(column=3, row=3)
 
 window.mainloop()
